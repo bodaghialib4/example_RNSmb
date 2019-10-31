@@ -47,6 +47,7 @@ export default class App extends Component {
         this.smbList(eventEmitter);
         this.smbDownload(eventEmitter);
         this.smbUpload(eventEmitter);
+        this.smbRename(eventEmitter);
 
     }
 
@@ -136,6 +137,24 @@ export default class App extends Component {
             'tast Ali/folder4',//destination path in smb server
             "",//source path in download directory of android device
             'video1.mp4',//file name
+        );
+    }
+
+    smbRename(eventEmitter){
+        //rename event listeners
+        eventEmitter.addListener('SMBRenameResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBRenameResult success');
+            } else {
+                console.log('SMBRenameResult error');
+            }
+        });
+        //test rename
+        RNSmb.rename(
+            'tast Ali/folder4',//file path in smb server
+            'video1.mp4',//old file name
+            'video11.mp4',//new file name
         );
     }
 
