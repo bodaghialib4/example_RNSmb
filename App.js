@@ -14,6 +14,7 @@ import {
     View,
     Text,
     StatusBar,
+    NativeEventEmitter,
 } from 'react-native';
 
 import {
@@ -32,7 +33,33 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-        RNSmb.show('Ali Bala testing RNSmb.show');
+        //RNSmb.show('Ali Bala testing RNSmb.show');
+        this.testingRNSmbMethods()
+    }
+
+    async testingRNSmbMethods() {
+        this.smbInit();
+
+    }
+
+    smbInit(){
+        //init RNSmb
+        let options = {
+            workGroup: 'WORKGROUP',
+            ip: '192.168.1.108',
+            username: 'aba',
+            password: '1',
+            sharedFolder: 'ali',
+        };
+        RNSmb.init(options,
+            (url) => {
+                console.log('success. url: ' + url);
+            }
+            ,
+            (errorMessage) => {
+                console.log('errorMessage: ' + errorMessage);
+            },
+        );
     }
 
     render() {
