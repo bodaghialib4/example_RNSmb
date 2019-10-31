@@ -48,6 +48,8 @@ export default class App extends Component {
         this.smbDownload(eventEmitter);
         this.smbUpload(eventEmitter);
         this.smbRename(eventEmitter);
+        this.smbMoveTo(eventEmitter);
+        this.smbCopyTo(eventEmitter);
 
     }
 
@@ -155,6 +157,42 @@ export default class App extends Component {
             'tast Ali/folder4',//file path in smb server
             'video1.mp4',//old file name
             'video11.mp4',//new file name
+        );
+    }
+
+    smbMoveTo(eventEmitter){
+        //move event listeners
+        eventEmitter.addListener('SMBMoveResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBMoveResult success');
+            } else {
+                console.log('SMBMoveResult error');
+            }
+        });
+        //test move
+        RNSmb.moveTo(
+            'tast Ali/folder3',//file old path in smb server
+            'tast Ali/folder5',//file new path in smb server
+            'video1.mp4',//file name
+        );
+    }
+
+    smbCopyTo(eventEmitter){
+        //move event listeners
+        eventEmitter.addListener('SMBCopyResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBCopyResult success');
+            } else {
+                console.log('SMBCopyResult error');
+            }
+        });
+        //test copy
+        RNSmb.copyTo(
+            'tast Ali/folder3',//file old path in smb server
+            'tast Ali/folder6',//file new path in smb server
+            'video1.mp4',//file name
         );
     }
 
