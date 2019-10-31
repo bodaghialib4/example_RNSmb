@@ -44,6 +44,7 @@ export default class App extends Component {
 
         this.smbInit();
         this.smbTestConnection(eventEmitter);
+        this.smbList(eventEmitter);
 
     }
 
@@ -78,6 +79,21 @@ export default class App extends Component {
         });
         //test connection
         RNSmb.testConnection();
+    }
+
+    smbList(eventEmitter){
+        //list event listeners
+        eventEmitter.addListener('SMBList', (event) => {
+            if (event.success) {
+                console.log('List success message: ' + event.message);
+                console.log('event: ' + JSON.stringify(event));
+            } else {
+                console.log('List error message: ' + event.message);
+            }
+        });
+        //list files & folders
+        RNSmb.list('');
+        //RNSmb.list('tast Ali');
     }
 
     render() {
