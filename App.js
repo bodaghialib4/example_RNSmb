@@ -38,7 +38,12 @@ export default class App extends Component {
     }
 
     async testingRNSmbMethods() {
+
+        //init eventEmitter
+        const eventEmitter = new NativeEventEmitter(RNSmb);
+
         this.smbInit();
+        this.smbTestConnection(eventEmitter);
 
     }
 
@@ -60,6 +65,19 @@ export default class App extends Component {
                 console.log('errorMessage: ' + errorMessage);
             },
         );
+    }
+
+    smbTestConnection(eventEmitter){
+        //TestConnection event listeners
+        eventEmitter.addListener('SMBTestConnection', (event) => {
+            if (event.success) {
+                console.log('TestConnection success message: ' + event.message);
+            } else {
+                console.log('TestConnection error message: ' + event.message);
+            }
+        });
+        //test connection
+        RNSmb.testConnection();
     }
 
     render() {
