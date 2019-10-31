@@ -45,6 +45,7 @@ export default class App extends Component {
         this.smbInit();
         this.smbTestConnection(eventEmitter);
         this.smbList(eventEmitter);
+        this.smbDownload(eventEmitter);
 
     }
 
@@ -94,6 +95,26 @@ export default class App extends Component {
         //list files & folders
         RNSmb.list('');
         //RNSmb.list('tast Ali');
+    }
+
+    smbDownload(eventEmitter){
+        //download event listeners
+        eventEmitter.addListener('SMBDownloadResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBDownloadResult success');
+            } else {
+                console.log('SMBDownloadResult error');
+            }
+        });
+        eventEmitter.addListener('SMBDownloadProgress', (data) => {
+            console.log('SMBDownloadProgress data:' + JSON.stringify(data));
+        });
+        //test download
+        RNSmb.download(
+            'tast Ali',//source file path
+            'video1.mp4',//source file name
+        );
     }
 
     render() {
