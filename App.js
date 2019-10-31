@@ -24,12 +24,15 @@ import {
     ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import RNSmb from 'react-native-smb';
+
 export default class App extends Component {
     constructor(props) {
         super(props);
     }
 
     componentDidMount() {
+        RNSmb.show('Ali Bala testing RNSmb.show');
     }
 
     render() {
