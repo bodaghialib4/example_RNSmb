@@ -46,6 +46,7 @@ export default class App extends Component {
         this.smbTestConnection(eventEmitter);
         this.smbList(eventEmitter);
         this.smbDownload(eventEmitter);
+        this.smbUpload(eventEmitter);
 
     }
 
@@ -114,6 +115,27 @@ export default class App extends Component {
         RNSmb.download(
             'tast Ali',//source file path
             'video1.mp4',//source file name
+        );
+    }
+
+    smbUpload(eventEmitter){
+        //upload event listeners
+        eventEmitter.addListener('SMBUploadResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBUploadResult success');
+            } else {
+                console.log('SMBUploadResult error');
+            }
+        });
+        eventEmitter.addListener('SMBUploadProgress', (data) => {
+            console.log('SMBUploadProgress data:' + JSON.stringify(data));
+        });
+        //test upload
+        RNSmb.upload(
+            'tast Ali/folder4',//destination path in smb server
+            "",//source path in download directory of android device
+            'video1.mp4',//file name
         );
     }
 
