@@ -51,6 +51,7 @@ export default class App extends Component {
         this.smbMoveTo(eventEmitter);
         this.smbCopyTo(eventEmitter);
         this.smbMakeDir(eventEmitter);
+        this.smbDelete(eventEmitter);
 
     }
 
@@ -210,6 +211,22 @@ export default class App extends Component {
         //test makeDir
         RNSmb.makeDir(
             'tast Ali/folder7'// path of new directory in smb server
+        );
+    }
+
+    smbDelete(eventEmitter){
+        //delete event listeners
+        eventEmitter.addListener('SMBDeleteResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBDeleteResult success');
+            } else {
+                console.log('SMBDeleteResult error');
+            }
+        });
+        //test delete
+        RNSmb.delete(
+            'tast Ali/folder7/'// path of a file or directory in smb server that must delete
         );
     }
 
