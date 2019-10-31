@@ -50,6 +50,7 @@ export default class App extends Component {
         this.smbRename(eventEmitter);
         this.smbMoveTo(eventEmitter);
         this.smbCopyTo(eventEmitter);
+        this.smbMakeDir(eventEmitter);
 
     }
 
@@ -179,7 +180,7 @@ export default class App extends Component {
     }
 
     smbCopyTo(eventEmitter){
-        //move event listeners
+        //copy event listeners
         eventEmitter.addListener('SMBCopyResult', (event) => {
             console.log(JSON.stringify(event));
             if (event.success) {
@@ -195,6 +196,23 @@ export default class App extends Component {
             'video1.mp4',//file name
         );
     }
+
+    smbMakeDir(eventEmitter){
+        //makeDir event listeners
+        eventEmitter.addListener('SMBMakeDirResult', (event) => {
+            console.log(JSON.stringify(event));
+            if (event.success) {
+                console.log('SMBMakeDirResult success');
+            } else {
+                console.log('SMBMakeDirResult error');
+            }
+        });
+        //test makeDir
+        RNSmb.makeDir(
+            'tast Ali/folder7'// path of new directory in smb server
+        );
+    }
+
 
     render() {
         return (
