@@ -11,30 +11,48 @@ import {
     SafeAreaView,
     StyleSheet,
     ScrollView,
+    TouchableOpacity,
     View,
     Text,
     StatusBar,
     NativeEventEmitter,
+    ToastAndroid,
 } from 'react-native';
 
 import {
     Header,
-    LearnMoreLinks,
     Colors,
-    DebugInstructions,
-    ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import {TextField} from 'react-native-material-textfield';
 import RNSmb from 'react-native-smb';
 
 export default class App extends Component {
     constructor(props) {
         super(props);
+        this.state = {
+            workGroup: 'WORKGROUP',
+            ip: '192.168.1.108',
+            port: '',
+            username: 'aba',
+            password: '1',
+            sharedFolder: 'ali',
+            currentPath: '',
+            list: [],
+            isConnected: false,
+            waitingForConnection: false,
+        };
+
+
     }
 
     componentDidMount() {
         //RNSmb.show('Ali Bala testing RNSmb.show');
-        this.testingRNSmbMethods()
+        //this.testingRNSmbMethods();
+    }
+
+    componentWillUnmount() {
+        this.removeAllSMBListener();
     }
 
     async testingRNSmbMethods() {
@@ -55,7 +73,7 @@ export default class App extends Component {
 
     }
 
-    smbInit(){
+    smbInit() {
         //init RNSmb
         let options = {
             workGroup: 'WORKGROUP',
@@ -75,7 +93,7 @@ export default class App extends Component {
         );
     }
 
-    smbTestConnection(eventEmitter){
+    smbTestConnection(eventEmitter) {
         //TestConnection event listeners
         eventEmitter.addListener('SMBTestConnection', (event) => {
             if (event.success) {
@@ -88,7 +106,7 @@ export default class App extends Component {
         RNSmb.testConnection();
     }
 
-    smbList(eventEmitter){
+    smbList(eventEmitter) {
         //list event listeners
         eventEmitter.addListener('SMBList', (event) => {
             if (event.success) {
@@ -103,7 +121,7 @@ export default class App extends Component {
         //RNSmb.list('tast Ali');
     }
 
-    smbDownload(eventEmitter){
+    smbDownload(eventEmitter) {
         //download event listeners
         eventEmitter.addListener('SMBDownloadResult', (event) => {
             console.log(JSON.stringify(event));
@@ -123,7 +141,7 @@ export default class App extends Component {
         );
     }
 
-    smbUpload(eventEmitter){
+    smbUpload(eventEmitter) {
         //upload event listeners
         eventEmitter.addListener('SMBUploadResult', (event) => {
             console.log(JSON.stringify(event));
@@ -139,12 +157,12 @@ export default class App extends Component {
         //test upload
         RNSmb.upload(
             'tast Ali/folder4',//destination path in smb server
-            "",//source path in download directory of android device
+            '',//source path in download directory of android device
             'video1.mp4',//file name
         );
     }
 
-    smbRename(eventEmitter){
+    smbRename(eventEmitter) {
         //rename event listeners
         eventEmitter.addListener('SMBRenameResult', (event) => {
             console.log(JSON.stringify(event));
@@ -162,7 +180,7 @@ export default class App extends Component {
         );
     }
 
-    smbMoveTo(eventEmitter){
+    smbMoveTo(eventEmitter) {
         //move event listeners
         eventEmitter.addListener('SMBMoveResult', (event) => {
             console.log(JSON.stringify(event));
@@ -180,7 +198,7 @@ export default class App extends Component {
         );
     }
 
-    smbCopyTo(eventEmitter){
+    smbCopyTo(eventEmitter) {
         //copy event listeners
         eventEmitter.addListener('SMBCopyResult', (event) => {
             console.log(JSON.stringify(event));
@@ -198,7 +216,7 @@ export default class App extends Component {
         );
     }
 
-    smbMakeDir(eventEmitter){
+    smbMakeDir(eventEmitter) {
         //makeDir event listeners
         eventEmitter.addListener('SMBMakeDirResult', (event) => {
             console.log(JSON.stringify(event));
@@ -210,11 +228,11 @@ export default class App extends Component {
         });
         //test makeDir
         RNSmb.makeDir(
-            'tast Ali/folder7'// path of new directory in smb server
+            'tast Ali/folder7',// path of new directory in smb server
         );
     }
 
-    smbDelete(eventEmitter){
+    smbDelete(eventEmitter) {
         //delete event listeners
         eventEmitter.addListener('SMBDeleteResult', (event) => {
             console.log(JSON.stringify(event));
@@ -226,10 +244,282 @@ export default class App extends Component {
         });
         //test delete
         RNSmb.delete(
-            'tast Ali/folder7/'// path of a file or directory in smb server that must delete
+            'tast Ali/folder7/',// path of a file or directory in smb server that must delete
         );
     }
 
+    /**
+     * for UI
+     */
+
+
+    showToast(message) {
+        ToastAndroid.showWithGravityAndOffset(
+            message,
+            ToastAndroid.SHORT,
+            ToastAndroid.BOTTOM,
+            0,
+            50,
+        );
+    }
+
+    initStates() {
+        this.setState({
+            workGroup: 'WORKGROUP',
+            ip: '192.168.1.108',
+            port: '',
+            username: 'aba',
+            password: '1',
+            sharedFolder: 'ali',
+            currentPath: '',
+            list: [],
+            isConnected: false,
+            waitingForConnection: false,
+        });
+        this.removeAllSMBListener();
+        this.showToast('initialing app completed');
+    }
+
+    SMBCall() {
+
+        //init eventEmitter
+        const eventEmitter = new NativeEventEmitter(RNSmb);
+
+        //TestConnection event listeners
+        eventEmitter.addListener('SMBTestConnection', (event) => {
+            if (event.success) {
+                console.log('TestConnection success message: ' + event.message);
+                this.showToast('server accessible');
+                this.setState({isConnected: true});
+
+                this.showToast('listing root directory');
+
+                RNSmb.list('');
+            } else {
+                this.showToast('error in accessing server');
+                console.log('TestConnection error message: ' + event.message);
+                this.setState({isConnected: false});
+            }
+            this.setState({waitingForConnection: false});
+        });
+        eventEmitter.addListener('SMBList', (event) => {
+            if (event.success && this.state.isConnected) {
+                console.log('List success message: ' + event.message);
+                console.log('event: ' + JSON.stringify(event));
+                let message = event.message;
+                message = message.split('[')[1];
+                let currentPath = message.split(']')[0];
+                this.setState({
+                    list: event.list,
+                    currentPath: currentPath,
+                });
+            } else {
+                this.showToast('error in listing directory');
+                console.log('List error message: ' + event.message);
+            }
+        });
+        //test connection
+        RNSmb.testConnection();
+
+    }
+
+    connectServer() {
+        let options = {
+            workGroup: this.state.workGroup,
+            ip: this.state.ip,
+            port: this.state.port,
+            username: this.state.username,
+            password: this.state.password,
+            sharedFolder: this.state.sharedFolder,
+        };
+        RNSmb.init(options,
+            (url) => {
+                console.log('init options success. url: ' + url);
+                this.SMBCall();
+                this.showToast('testing server accessibility');
+            }
+            ,
+            (errorMessage) => {
+                console.log('init options errorMessage: ' + errorMessage);
+                this.showToast('server init options error');
+            },
+        );
+
+    }
+
+    removeAllSMBListener() {
+        const eventEmitter = new NativeEventEmitter(RNSmb);
+        eventEmitter.removeAllListeners('SMBTestConnection');
+        eventEmitter.removeAllListeners('SMBList');
+
+    }
+
+    goBack() {
+        //list
+        if (this.state.currentPath) {
+            let targetPath = '';
+            let splitPath = this.state.currentPath.split('/');
+            console.log('splitPath in go back: ' + splitPath);
+            if (splitPath.length) {
+                let a = 'tast Ali/folder4/';
+                let removePart = splitPath[splitPath.length - 2] + '/' + splitPath[splitPath.length - 1];
+                targetPath = this.state.currentPath.replace(removePart, '');
+            }
+            console.log('targetPath to go back: ' + targetPath);
+            this.showToast(targetPath ? 'go back to ' + targetPath + ' directory' : 'go back to root directory');
+            RNSmb.list(targetPath);
+        } else {
+            this.showToast('no parent directory to go back');
+        }
+    }
+
+    enterDirectory(directoryName) {
+
+        let targetPath = this.state.currentPath + directoryName;
+        console.log('targetPath to go: ' + targetPath);
+        this.showToast('listing ' + targetPath + ' directory');
+
+        RNSmb.list(targetPath);
+
+    }
+
+
+    _renderListItems() {
+        if (this.state.list && this.state.list.length > 0) {
+            return this.state.list.map((file, id) => {
+                return (
+                    <View key={id}>
+                        {
+                            file['isDirectory'] ?
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        console.log('inter to directory: ' + file['name']);
+                                        this.enterDirectory(file['name']);
+                                        //this.enterDirectory.bind(this, f['filename']);
+                                    }}>
+                                    <Text style={styles.directory}>{file['name']}</Text>
+                                </TouchableOpacity>
+                                : <Text style={styles.file}>{file['name']}</Text>
+                        }
+                    </View>
+                );
+            });
+        }
+    }
+
+    _renderList() {
+        return (
+            <View style={styles.listContainer}>
+                <TouchableOpacity
+                    onPress={() => {
+                        console.log('go back');
+                        this.goBack();
+                        //this.goBack.bind(this)
+                    }}>
+                    {
+                        this.state.currentPath ?
+                            <Text style={{
+                                padding: 4,
+                                marginBottom: 3,
+                                borderBottomColor: 'gray',
+                                borderBottomWidth: 1,
+                            }}>{'==> ' + this.state.currentPath}</Text>
+                            :
+                            null
+                    }
+                </TouchableOpacity>
+                <View>
+                    {this._renderListItems()}
+                </View>
+            </View>
+
+        );
+    }
+
+    _renderOptions() {
+        return (
+            <View style={styles.options}>
+                <View style={styles.optionsRow}>
+                    <View style={{flex: 2, marginRight: 10}}>
+                        <TextField
+                            disabled={this.state.isConnected || this.state.waitingForConnection}
+                            labelHeight={15}
+                            label='Server IP'
+                            value={this.state.ip}
+                            onChangeText={(ip) => this.setState({ip})}
+                        />
+                    </View>
+                    <View style={{flex: 1}}>
+                        <TextField
+                            disabled={this.state.isConnected || this.state.waitingForConnection}
+                            labelHeight={15}
+                            label='Server Port'
+                            value={this.state.port}
+                            onChangeText={(port) => this.setState({port})}
+                        />
+                    </View>
+                </View>
+                <View style={styles.optionsRow}>
+                    <View style={{flex: 1, marginRight: 10}}>
+                        <TextField
+                            disabled={this.state.isConnected || this.state.waitingForConnection}
+                            labelHeight={15}
+                            label='Username'
+                            value={this.state.workGroup}
+                            onChangeText={(workGroup) => this.setState({workGroup})}
+                        />
+                    </View>
+                    <View style={{flex: 1}}>
+                        <TextField
+                            disabled={this.state.isConnected || this.state.waitingForConnection}
+                            labelHeight={15}
+                            label='Password'
+                            value={this.state.sharedFolder}
+                            onChangeText={(sharedFolder) => this.setState({sharedFolder})}
+                        />
+                    </View>
+                </View>
+                <View style={styles.optionsRow}>
+                    <View style={{flex: 1, marginRight: 10}}>
+                        <TextField
+                            disabled={this.state.isConnected || this.state.waitingForConnection}
+                            labelHeight={15}
+                            label='Username'
+                            value={this.state.username}
+                            onChangeText={(username) => this.setState({username})}
+                        />
+                    </View>
+                    <View style={{flex: 1}}>
+                        <TextField
+                            disabled={this.state.isConnected || this.state.waitingForConnection}
+                            labelHeight={15}
+                            label='Password'
+                            value={this.state.password}
+                            onChangeText={(password) => this.setState({password})}
+                        />
+                    </View>
+                </View>
+                <View style={[styles.optionsRow]}>
+                    <View style={[styles.connectionButtonContainer]}>
+                        <TouchableOpacity
+                            disabled={this.state.waitingForConnection}
+                            style={[styles.connectionButton, {backgroundColor: this.state.waitingForConnection ? 'gray' : '#09B4BB'}]}
+                            onPress={() => {
+                                //console.log('test connection');
+                                if (this.state.isConnected) {
+                                    this.initStates();
+                                } else {
+                                    this.setState({waitingForConnection: true});
+                                    this.connectServer();
+                                }
+                            }}>
+                            <Text style={{padding: 4}}>{this.state.isConnected ? 'Disconnect' : 'Connect'}</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </View>
+        );
+    }
 
     render() {
         return (
@@ -239,39 +529,15 @@ export default class App extends Component {
                     <ScrollView
                         contentInsetAdjustmentBehavior="automatic"
                         style={styles.scrollView}>
-                        <Header/>
                         {global.HermesInternal == null ? null : (
                             <View style={styles.engine}>
                                 <Text style={styles.footer}>Engine: Hermes</Text>
                             </View>
                         )}
                         <View style={styles.body}>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>Step One</Text>
-                                <Text style={styles.sectionDescription}>
-                                    Edit <Text style={styles.highlight}>App.js</Text> to change
-                                    this screen and then come back to see your edits.
-                                </Text>
-                            </View>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>See Your Changes</Text>
-                                <Text style={styles.sectionDescription}>
-                                    <ReloadInstructions/>
-                                </Text>
-                            </View>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>Debug</Text>
-                                <Text style={styles.sectionDescription}>
-                                    <DebugInstructions/>
-                                </Text>
-                            </View>
-                            <View style={styles.sectionContainer}>
-                                <Text style={styles.sectionTitle}>Learn More</Text>
-                                <Text style={styles.sectionDescription}>
-                                    Read the docs to discover what to do next:
-                                </Text>
-                            </View>
-                            <LearnMoreLinks/>
+                            {this._renderOptions()}
+                            {this._renderList()}
+
                         </View>
                     </ScrollView>
                 </SafeAreaView>
@@ -290,6 +556,34 @@ const styles = StyleSheet.create({
     },
     body: {
         backgroundColor: Colors.white,
+    },
+    options: {
+        paddingHorizontal: 10,
+        borderBottomColor: 'gray',
+        borderBottomWidth: 1,
+    },
+    optionsRow: {
+        flexDirection: 'row',
+    },
+    connectionButtonContainer: {
+        flex: 1,
+        margin: 5,
+        marginTop: 15,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    connectionButton: {
+        backgroundColor: 'rgba(30,255,216,0.51)',
+        width: 150,
+        height: 35,
+        borderRadius: 12,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    listContainer: {
+        flex: 1,
+        marginTop: 15,
+        marginBottom: 20,
     },
     sectionContainer: {
         marginTop: 32,
