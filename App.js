@@ -17,6 +17,7 @@ import {
     StatusBar,
     NativeEventEmitter,
     ToastAndroid,
+    PermissionsAndroid,
 } from 'react-native';
 
 import {
@@ -43,17 +44,90 @@ export default class App extends Component {
             waitingForConnection: false,
         };
 
+        this.permissions = {
+            read: false,
+            write: false,
+        };
 
     }
 
     componentDidMount() {
         //RNSmb.show('Ali Bala testing RNSmb.show');
         //this.testingRNSmbMethods();
+        this.requestStoragePermission();
     }
 
     componentWillUnmount() {
         this.removeAllSMBListener();
     }
+
+    async requestStoragePermission() {
+        await this.requestWriteStoragePermission();
+        await this.requestReadStoragePermission();
+    }
+
+    async requestReadStoragePermission() {
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+                {
+                    // title: 'دسترسی خواندن از حافظه گوشی',
+                    // message: 'جهت آپلود فایل در سرور نیاز به اجازه دسترسی خواندن از حافظه گوشی می باشد ',
+                    // buttonNeutral: 'بعدا ازم بپرس',
+                    // buttonNegative: 'اجازه نمی دهم',
+                    // buttonPositive: 'اجازه می دهم',
+                    title: 'Storage Read Access Permission',
+                    message: 'To upload a file, accessing storage read permission required.',
+                    buttonNeutral: 'Ask Me Later',
+                    buttonNegative: 'Cancel',
+                    buttonPositive: 'OK',
+                },
+            );
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                console.log('You can read from the EXTERNAL_STORAGE');
+                this.permissions.read = true;
+                this.showToast('READ_EXTERNAL_STORAGE GRANTED.');
+            } else {
+                console.log('READ_EXTERNAL_STORAGE permission denied');
+                this.showToast('READ_EXTERNAL_STORAGE not GRANTED.');
+                this.permissions.read = false;
+            }
+        } catch (err) {
+            console.warn(err);
+        }
+    }
+
+    async requestWriteStoragePermission() {
+        try {
+            const granted = await PermissionsAndroid.request(
+                PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+                {
+                    // title: 'دسترسی نوشتن در حافظه گوشی',
+                    // message: 'جهت آپلود فایل در سرور نیاز به اجازه دسترسی نوشتن در حافظه گوشی می باشد ',
+                    // buttonNeutral: 'بعدا ازم بپرس',
+                    // buttonNegative: 'اجازه نمی دهم',
+                    // buttonPositive: 'اجازه می دهم',
+                    title: 'Storage write Access Permission',
+                    message: 'To download a file, accessing storage write permission required.',
+                    buttonNeutral: 'Ask Me Later',
+                    buttonNegative: 'Cancel',
+                    buttonPositive: 'OK',
+                },
+            );
+            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+                console.log('You can write to the EXTERNAL_STORAGE');
+                this.showToast('WRITE_EXTERNAL_STORAGE GRANTED.');
+                this.permissions.write = true;
+            } else {
+                console.log('WRITE_EXTERNAL_STORAGE permission denied');
+                this.showToast('WRITE_EXTERNAL_STORAGE not GRANTED.');
+                this.permissions.write = false;
+            }
+        } catch (err) {
+            console.warn(err);
+        }
+    }
+
 
     async testingRNSmbMethods() {
 
