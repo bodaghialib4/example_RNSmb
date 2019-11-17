@@ -139,7 +139,7 @@ export default class App extends Component {
         this.smbInit();
         this.smbTestConnection();
         this.smbList();
-        // this.smbDownload();
+        this.smbDownload();
         // this.smbUpload();
         // this.smbRename();
         // this.smbMoveTo();
@@ -214,23 +214,30 @@ export default class App extends Component {
     }
 
     smbDownload(eventEmitter) {
-        //download event listeners
-        eventEmitter.addListener('SMBDownloadResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBDownloadResult success');
-            } else {
-                console.log('SMBDownloadResult error');
-            }
-        });
-        eventEmitter.addListener('SMBDownloadProgress', (data) => {
-            console.log('SMBDownloadProgress data:' + JSON.stringify(data));
-        });
         //test download
-        RNSmb.download(
-            'tast Ali',//source file path
-            'video1.mp4',//source file name
+        this.smbClient.on(
+            'downloadProgress',
+            (data) => {
+                console.log('download progress data (on downloadProgress): ' + JSON.stringify(data));
+            },
         );
+
+        this.smbClient.on(
+            'download',
+            (data) => {
+                console.log('download data (on download): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.download(
+            '',
+            '',
+            '1.zip',
+            (data) => {//callback
+                console.log('download data (callback): ' + JSON.stringify(data));
+            },
+        );
+
     }
 
     smbUpload(eventEmitter) {
