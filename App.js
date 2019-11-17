@@ -213,10 +213,6 @@ export default class App extends Component {
         );
     }
 
-        RNSmb.list('');
-        //RNSmb.list('tast Ali');
-    }
-
     smbDownload(eventEmitter) {
         //download event listeners
         eventEmitter.addListener('SMBDownloadResult', (event) => {
