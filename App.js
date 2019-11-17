@@ -138,7 +138,7 @@ export default class App extends Component {
 
         this.smbInit();
         this.smbTestConnection();
-        // this.smbList();
+        this.smbList();
         // this.smbDownload();
         // this.smbUpload();
         // this.smbRename();
@@ -196,17 +196,23 @@ export default class App extends Component {
 
     }
 
-    smbList(eventEmitter) {
-        //list event listeners
-        eventEmitter.addListener('SMBList', (event) => {
-            if (event.success) {
-                console.log('List success message: ' + event.message);
-                console.log('event: ' + JSON.stringify(event));
-            } else {
-                console.log('List error message: ' + event.message);
-            }
-        });
+    smbList() {
         //list files & folders
+        this.smbClient.on(
+            'list',
+            (data) => {
+                console.log('list data (on list): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.list(
+            '3/2/1',
+            (data) => {//callback
+                console.log('list data (callback): ' + JSON.stringify(data));
+            },
+        );
+    }
+
         RNSmb.list('');
         //RNSmb.list('tast Ali');
     }
