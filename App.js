@@ -140,7 +140,7 @@ export default class App extends Component {
         this.smbTestConnection();
         this.smbList();
         this.smbDownload();
-        // this.smbUpload();
+        this.smbUpload();
         // this.smbRename();
         // this.smbMoveTo();
         // this.smbCopyTo();
@@ -241,25 +241,32 @@ export default class App extends Component {
 
     }
 
-    smbUpload(eventEmitter) {
-        //upload event listeners
-        eventEmitter.addListener('SMBUploadResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBUploadResult success');
-            } else {
-                console.log('SMBUploadResult error');
-            }
-        });
-        eventEmitter.addListener('SMBUploadProgress', (data) => {
-            console.log('SMBUploadProgress data:' + JSON.stringify(data));
-        });
+    smbUpload() {
         //test upload
-        RNSmb.upload(
-            'tast Ali/folder4',//destination path in smb server
-            '',//source path in download directory of android device
-            'video1.mp4',//file name
+        this.smbClient.on(
+            'uploadProgress',
+            (data) => {
+                console.log('upload progress data (on uploadProgress): ' + JSON.stringify(data));
+
+            },
         );
+
+        this.smbClient.on(
+            'upload',
+            (data) => {
+                console.log('upload data (on upload): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.upload(
+            '',
+            '',
+            'photo1.jpg',
+            (data) => {//callback
+                console.log('upload data (callback): ' + JSON.stringify(data));
+            },
+        );
+
     }
 
     smbRename(eventEmitter) {
