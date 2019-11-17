@@ -219,6 +219,7 @@ export default class App extends Component {
             'downloadProgress',
             (data) => {
                 console.log('download progress data (on downloadProgress): ' + JSON.stringify(data));
+                this.smbClient.cancelDownload(data.downloadId);
             },
         );
 
