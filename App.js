@@ -247,6 +247,7 @@ export default class App extends Component {
             'uploadProgress',
             (data) => {
                 console.log('upload progress data (on uploadProgress): ' + JSON.stringify(data));
+                this.smbClient.cancelUpload(data.uploadId)
 
             },
         );
