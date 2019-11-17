@@ -26,7 +26,9 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import {TextField} from 'react-native-material-textfield';
-import RNSmb from 'react-native-smb';
+import SMBClient from 'react-native-smb';
+
+let RNSmb = '';
 
 export default class App extends Component {
     constructor(props) {
@@ -53,7 +55,7 @@ export default class App extends Component {
 
     componentDidMount() {
         //RNSmb.show('Ali Bala testing RNSmb.show');
-        //this.testingRNSmbMethods();
+        this.testingRNSmbMethods();
         this.requestStoragePermission();
     }
 
@@ -135,34 +137,44 @@ export default class App extends Component {
         const eventEmitter = new NativeEventEmitter(RNSmb);
 
         this.smbInit();
-        this.smbTestConnection(eventEmitter);
-        this.smbList(eventEmitter);
-        this.smbDownload(eventEmitter);
-        this.smbUpload(eventEmitter);
-        this.smbRename(eventEmitter);
-        this.smbMoveTo(eventEmitter);
-        this.smbCopyTo(eventEmitter);
-        this.smbMakeDir(eventEmitter);
-        this.smbDelete(eventEmitter);
+        // this.smbTestConnection();
+        // this.smbList();
+        // this.smbDownload();
+        // this.smbUpload();
+        // this.smbRename();
+        // this.smbMoveTo();
+        // this.smbCopyTo();
+        // this.smbMakeDir();
+        // this.smbDelete();
 
     }
 
     smbInit() {
         //init RNSmb
-        let options = {
-            workGroup: 'WORKGROUP',
-            ip: '192.168.1.108',
-            username: 'aba',
-            password: '1',
-            sharedFolder: 'ali',
-        };
-        RNSmb.init(options,
-            (url) => {
-                console.log('success. url: ' + url);
-            }
-            ,
-            (errorMessage) => {
-                console.log('errorMessage: ' + errorMessage);
+
+        this.smbClient = new SMBClient(
+            '192.168.1.192',//ip
+            '',//port
+            'ali',//sharedFolder,
+            'WORKGROUP',//workGroup,
+            'aba',//username,
+            '1',//password,
+            (data) => {//callback
+                console.log('new SMBClient data (callback): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.on(
+            'error',
+            (data) => {
+                console.log('error in SMBClient (on error): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.on(
+            'init',
+            (data) => {
+                console.log('new SMBClient data (on init): ' + JSON.stringify(data));
             },
         );
     }
