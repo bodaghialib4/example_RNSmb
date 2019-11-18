@@ -61,6 +61,7 @@ export default class App extends Component {
 
     componentWillUnmount() {
         this.removeAllSMBListener();
+        this.smbDisconnect()
     }
 
     async requestStoragePermission() {
@@ -146,7 +147,7 @@ export default class App extends Component {
         // this.smbCopyTo();
         // this.smbMakeDir();
         // this.smbDelete();
-
+        // this.smbDisconnect();
     }
 
     smbInit() {
@@ -354,6 +355,24 @@ export default class App extends Component {
         RNSmb.delete(
             'tast Ali/folder7/',// path of a file or directory in smb server that must delete
         );
+    }
+
+    smbDisconnect() {
+        if (this.smbClient) {
+            this.smbClient.on(
+                'disconnect',
+                (data) => {
+                    console.log('disconnect data (on disconnect): ' + JSON.stringify(data));
+                    this.smbClient = null
+                },
+            );
+
+            this.smbClient.disconnect(
+                (data) => {//callback
+                    console.log('disconnect data (callback): ' + JSON.stringify(data));
+                },
+            );
+        }
     }
 
     /**
