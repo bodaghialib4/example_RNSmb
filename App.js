@@ -35,7 +35,7 @@ export default class App extends Component {
         super(props);
         this.state = {
             workGroup: 'WORKGROUP',
-            ip: '192.168.1.108',
+            ip: '192.168.1.192',
             port: '',
             username: 'aba',
             password: '1',
@@ -54,13 +54,11 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-        //RNSmb.show('Ali Bala testing RNSmb.show');
         //this.testingRNSmbMethods();
         //this.requestStoragePermission();
     }
 
     componentWillUnmount() {
-        this.removeAllSMBListener();
         this.smbDisconnect()
     }
 
@@ -410,82 +408,76 @@ export default class App extends Component {
             isConnected: false,
             waitingForConnection: false,
         });
-        this.removeAllSMBListener();
+        this.smbClient.disconnect();
         this.showToast('initialing app completed');
     }
 
-    SMBCall() {
+    SMBInitializingCall() {
 
-        //init eventEmitter
-        const eventEmitter = new NativeEventEmitter(RNSmb);
+        if(this.smbClient) {
 
-        //TestConnection event listeners
-        eventEmitter.addListener('SMBTestConnection', (event) => {
-            if (event.success) {
-                console.log('TestConnection success message: ' + event.message);
-                this.showToast('server accessible');
-                this.setState({isConnected: true});
+            this.smbClient.on("error", (data) => {
+                console.log('error in smbClient: ' + JSON.stringify(data));
+            });
 
-                this.showToast('listing root directory');
+            this.smbClient.on("init", (data) => {
+                console.log('on init of smbClient: ' + JSON.stringify(data));
+            });
 
-                RNSmb.list('');
-            } else {
-                this.showToast('error in accessing server');
-                console.log('TestConnection error message: ' + event.message);
-                this.setState({isConnected: false});
-            }
-            this.setState({waitingForConnection: false});
-        });
-        eventEmitter.addListener('SMBList', (event) => {
-            if (event.success && this.state.isConnected) {
-                console.log('List success message: ' + event.message);
-                console.log('event: ' + JSON.stringify(event));
-                let message = event.message;
-                message = message.split('[')[1];
-                let currentPath = message.split(']')[0];
-                this.setState({
-                    list: event.list,
-                    currentPath: currentPath,
-                });
-            } else {
-                this.showToast('error in listing directory');
-                console.log('List error message: ' + event.message);
-            }
-        });
-        //test connection
-        RNSmb.testConnection();
+            this.smbClient.on("testConnection", (data) => {
+                console.log('on testConnection of smbClient: ' + JSON.stringify(data));
+                if(data.success){
+                    this.showToast('server accessible');
+                    this.setState({isConnected: true});
+                    this.showToast('listing root directory');
+                    this.smbClient.list('');
+                }else{
+                    this.showToast('error in accessing server');
+                    this.setState({isConnected: false});
+                }
+                this.setState({waitingForConnection: false});
+            });
 
+            this.smbClient.on("list", (data) => {
+                console.log('on list of smbClient: ' + JSON.stringify(data));
+                if(data.success && this.state.isConnected){
+                    this.showToast('list successfully');
+                    let message = data.message;
+                    message = message.split('[')[1];
+                    let currentPath = message.split(']')[0];
+                    this.setState({
+                        list: data.list,
+                        currentPath: currentPath,
+                    });
+                }else{
+                    this.showToast('error in listing directory');
+                }
+            });
+
+            this.smbClient.testConnection();
+
+        }
     }
 
     connectServer() {
-        let options = {
-            workGroup: this.state.workGroup,
-            ip: this.state.ip,
-            port: this.state.port,
-            username: this.state.username,
-            password: this.state.password,
-            sharedFolder: this.state.sharedFolder,
-        };
-        RNSmb.init(options,
-            (url) => {
-                console.log('init options success. url: ' + url);
-                this.SMBCall();
-                this.showToast('testing server accessibility');
+
+        this.smbClient = new SMBClient(
+            this.state.ip,
+            this.state.port,
+            this.state.sharedFolder,
+            this.state.workGroup,
+            this.state.username,
+            this.state.password,
+            (data) => {
+                console.log('new SMBClient callback data : ' + JSON.stringify(data));
+                if(data.success) {
+                    console.log('new SMBClient created successfully');
+                    this.SMBInitializingCall();
+                }else{
+                    console.log('error in new SMBClient');
+                }
             }
-            ,
-            (errorMessage) => {
-                console.log('init options errorMessage: ' + errorMessage);
-                this.showToast('server init options error');
-            },
         );
-
-    }
-
-    removeAllSMBListener() {
-        const eventEmitter = new NativeEventEmitter(RNSmb);
-        eventEmitter.removeAllListeners('SMBTestConnection');
-        eventEmitter.removeAllListeners('SMBList');
-
     }
 
     goBack() {
@@ -501,7 +493,7 @@ export default class App extends Component {
             }
             console.log('targetPath to go back: ' + targetPath);
             this.showToast(targetPath ? 'go back to ' + targetPath + ' directory' : 'go back to root directory');
-            RNSmb.list(targetPath);
+            this.smbClient.list(targetPath);
         } else {
             this.showToast('no parent directory to go back');
         }
@@ -513,7 +505,7 @@ export default class App extends Component {
         console.log('targetPath to go: ' + targetPath);
         this.showToast('listing ' + targetPath + ' directory');
 
-        RNSmb.list(targetPath);
+        this.smbClient.list(targetPath);
 
     }
 
