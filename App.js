@@ -348,20 +348,23 @@ export default class App extends Component {
 
     }
 
-    smbDelete(eventEmitter) {
-        //delete event listeners
-        eventEmitter.addListener('SMBDeleteResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBDeleteResult success');
-            } else {
-                console.log('SMBDeleteResult error');
-            }
-        });
-        //test delete
-        RNSmb.delete(
-            'tast Ali/folder7/',// path of a file or directory in smb server that must delete
+    smbDelete() {
+        // test delete
+
+        this.smbClient.on(
+            'delete',
+            (data) => {
+                console.log('delete data (on delete): ' + JSON.stringify(data));
+            },
         );
+
+        this.smbClient.delete(
+            '3/2/1/',
+            (data) => {//callback
+                console.log('delete data (callback): ' + JSON.stringify(data));
+            },
+        );
+
     }
 
     smbDisconnect() {
