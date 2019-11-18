@@ -55,8 +55,8 @@ export default class App extends Component {
 
     componentDidMount() {
         //RNSmb.show('Ali Bala testing RNSmb.show');
-        this.testingRNSmbMethods();
-        this.requestStoragePermission();
+        //this.testingRNSmbMethods();
+        //this.requestStoragePermission();
     }
 
     componentWillUnmount() {
@@ -134,9 +134,6 @@ export default class App extends Component {
 
     async testingRNSmbMethods() {
 
-        //init eventEmitter
-        const eventEmitter = new NativeEventEmitter(RNSmb);
-
         this.smbInit();
         this.smbTestConnection();
         this.smbList();
@@ -146,7 +143,7 @@ export default class App extends Component {
         this.smbMoveTo();
         this.smbCopyTo();
         this.smbMakeDir();
-        // this.smbDelete();
+        this.smbDelete();
         // this.smbDisconnect();
     }
 
