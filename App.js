@@ -142,8 +142,8 @@ export default class App extends Component {
         this.smbList();
         this.smbDownload();
         this.smbUpload();
-        // this.smbRename();
-        // this.smbMoveTo();
+        this.smbRename();
+        this.smbMoveTo();
         // this.smbCopyTo();
         // this.smbMakeDir();
         // this.smbDelete();
@@ -288,23 +288,25 @@ export default class App extends Component {
                 console.log('rename data (callback): ' + JSON.stringify(data));
             },
         );
+
     }
 
-    smbMoveTo(eventEmitter) {
-        //move event listeners
-        eventEmitter.addListener('SMBMoveResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBMoveResult success');
-            } else {
-                console.log('SMBMoveResult error');
-            }
-        });
-        //test move
-        RNSmb.moveTo(
-            'tast Ali/folder3',//file old path in smb server
-            'tast Ali/folder5',//file new path in smb server
-            'video1.mp4',//file name
+    smbMoveTo() {
+        // test move
+        this.smbClient.on(
+            'moveTo',
+            (data) => {
+                console.log('moveTo data (on moveTo): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.moveTo(
+            '',
+            '3',
+            '6.jpg',
+            (data) => {//callback
+                console.log('moveTo data (callback): ' + JSON.stringify(data));
+            },
         );
     }
 
