@@ -271,21 +271,22 @@ export default class App extends Component {
 
     }
 
-    smbRename(eventEmitter) {
-        //rename event listeners
-        eventEmitter.addListener('SMBRenameResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBRenameResult success');
-            } else {
-                console.log('SMBRenameResult error');
-            }
-        });
+    smbRename() {
         //test rename
-        RNSmb.rename(
-            'tast Ali/folder4',//file path in smb server
-            'video1.mp4',//old file name
-            'video11.mp4',//new file name
+        this.smbClient.on(
+            'rename',
+            (data) => {
+                console.log('rename data (on rename): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.rename(
+            '',
+            '7.jpg',
+            '6.jpg',
+            (data) => {//callback
+                console.log('rename data (callback): ' + JSON.stringify(data));
+            },
         );
     }
 
