@@ -145,7 +145,7 @@ export default class App extends Component {
         this.smbRename();
         this.smbMoveTo();
         this.smbCopyTo();
-        // this.smbMakeDir();
+        this.smbMakeDir();
         // this.smbDelete();
         // this.smbDisconnect();
     }
@@ -330,20 +330,22 @@ export default class App extends Component {
         );
     }
 
-    smbMakeDir(eventEmitter) {
-        //makeDir event listeners
-        eventEmitter.addListener('SMBMakeDirResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBMakeDirResult success');
-            } else {
-                console.log('SMBMakeDirResult error');
-            }
-        });
-        //test makeDir
-        RNSmb.makeDir(
-            'tast Ali/folder7',// path of new directory in smb server
+    smbMakeDir() {
+        // test makeDir
+        this.smbClient.on(
+            'makeDir',
+            (data) => {
+                console.log('makeDir data (on makeDir): ' + JSON.stringify(data));
+            },
         );
+
+        this.smbClient.makeDir(
+            '3/2/1/0',
+            (data) => {//callback
+                console.log('makeDir data (callback): ' + JSON.stringify(data));
+            },
+        );
+
     }
 
     smbDelete(eventEmitter) {
