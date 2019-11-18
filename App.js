@@ -144,7 +144,7 @@ export default class App extends Component {
         this.smbUpload();
         this.smbRename();
         this.smbMoveTo();
-        // this.smbCopyTo();
+        this.smbCopyTo();
         // this.smbMakeDir();
         // this.smbDelete();
         // this.smbDisconnect();
@@ -310,21 +310,23 @@ export default class App extends Component {
         );
     }
 
-    smbCopyTo(eventEmitter) {
-        //copy event listeners
-        eventEmitter.addListener('SMBCopyResult', (event) => {
-            console.log(JSON.stringify(event));
-            if (event.success) {
-                console.log('SMBCopyResult success');
-            } else {
-                console.log('SMBCopyResult error');
-            }
-        });
+    smbCopyTo() {
         //test copy
-        RNSmb.copyTo(
-            'tast Ali/folder3',//file old path in smb server
-            'tast Ali/folder6',//file new path in smb server
-            'video1.mp4',//file name
+
+        this.smbClient.on(
+            'copyTo',
+            (data) => {
+                console.log('copyTo data (on copyTo): ' + JSON.stringify(data));
+            },
+        );
+
+        this.smbClient.copyTo(
+            '3',
+            '',
+            '6.jpg',
+            (data) => {//callback
+                console.log('copyTo data (callback): ' + JSON.stringify(data));
+            },
         );
     }
 
